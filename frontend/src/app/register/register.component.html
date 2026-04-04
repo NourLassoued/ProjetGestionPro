@@ -1,0 +1,118 @@
+<div class="register-page">
+
+  <!-- Left: Form -->
+  <div class="register-left">
+    <div class="register-form-wrap">
+
+      <!-- Logo -->
+      <div class="register-brand">
+        <div class="brand-icon"><i class='bx bxs-layer'></i></div>
+        <span>AdminHub</span>
+      </div>
+
+      <h1>Create an account</h1>
+      <p class="register-subtitle">Join us and start managing your projects</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- Name -->
+        <div class="form-group">
+          <label for="firstname">Full Name</label>
+          <div class="input-wrap">
+            <i class='bx bx-user'></i>
+            <input type="text" id="firstname" formControlName="firstname"
+                   placeholder="Enter your name">
+          </div>
+          <div class="field-error"
+               *ngIf="registerForm.get('firstname')?.invalid && registerForm.get('firstname')?.touched">
+            Name is required
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <i class='bx bx-envelope'></i>
+            <input type="email" id="email" formControlName="email"
+                   placeholder="you@gmail.com">
+          </div>
+          <div class="field-error"
+               *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            Please enter a valid @gmail.com email
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class='bx bx-lock-alt'></i>
+            <input type="password" id="password" formControlName="password"
+                   placeholder="Min. 8 characters">
+          </div>
+          <div class="field-error"
+               *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            Password must be at least 8 characters
+          </div>
+        </div>
+
+        <!-- Image upload -->
+        <div class="form-group">
+          <label>Profile Picture <span class="optional">(optional)</span></label>
+          <div class="file-upload-wrap">
+            <input type="file" id="image" (change)="onFileSelected($event)" accept="image/*">
+            <label for="image" class="file-upload-label">
+              <i class='bx bx-cloud-upload'></i>
+              <span>{{ selectedFile ? selectedFile.name : 'Choose a file...' }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div class="terms-wrap">
+          <input type="checkbox" id="agreedToTerms" formControlName="agreedToTerms">
+          <label for="agreedToTerms">
+            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-register"
+                [disabled]="registerForm.invalid">
+          <i class='bx bx-user-plus'></i> Create Account
+        </button>
+
+      </form>
+
+      <!-- Login link -->
+      <p class="login-link">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- Right: Illustration -->
+  <div class="register-right">
+    <div class="illustration-content">
+      <div class="floating-card card-1">
+        <i class='bx bxs-folder-open'></i>
+        <span>12 Projects</span>
+      </div>
+      <div class="floating-card card-2">
+        <i class='bx bxs-group'></i>
+        <span>Team of 8</span>
+      </div>
+      <div class="floating-card card-3">
+        <i class='bx bxs-check-circle'></i>
+        <span>48 Tasks Done</span>
+      </div>
+      <div class="illustration-text">
+        <h2>Manage your projects<br>with ease</h2>
+        <p>Organize tasks, collaborate with your team, and track progress in one place.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

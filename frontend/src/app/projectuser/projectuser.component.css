@@ -1,0 +1,287 @@
+/* ================================================
+   AJOUT à src/styles.css — Page Projects
+   Coller ce bloc à la FIN de votre styles.css existant
+================================================ */
+
+/* ---- Head actions (projects page) ---- */
+#content main .head-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+#content main .head-actions h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.head-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.projects-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--blue-light);
+  border-radius: 10px;
+  padding: 8px 16px;
+  min-width: 60px;
+}
+.projects-count .count-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--blue);
+  line-height: 1;
+}
+.projects-count .count-label {
+  font-size: 10px;
+  color: var(--blue);
+  font-weight: 500;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ---- Projects grid ---- */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ---- Project card ---- */
+.project-card {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(79, 142, 247, 0.10);
+}
+
+/* Card header avec couleur d'accent */
+.project-card-header {
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.project-card-header.accent-0 { background: linear-gradient(135deg, #EBF2FF 0%, #C2D9FF 100%); }
+.project-card-header.accent-1 { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); }
+.project-card-header.accent-2 { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+.project-card-header.accent-3 { background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%); }
+.project-card-header.accent-4 { background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%); }
+
+.project-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+.project-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.project-index {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.6);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.6);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.member-chip i { font-size: 13px; }
+
+/* Card body */
+.project-card-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+.project-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.project-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.btn-text:hover { color: #3a7ae0; }
+
+/* Members list (expandable) */
+.members-list,
+.email-list {
+  margin: 0 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.members-list-header,
+.email-list-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.members-list ul,
+.email-list ul {
+  list-style: none;
+  padding: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.member-item,
+.email-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.member-item:last-child,
+.email-item:last-child { border-bottom: none; }
+.email-item:hover { background: var(--blue-light); }
+
+.member-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+.empty-msg {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Card footer */
+.project-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.btn-action:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-color: var(--blue-mid);
+}
+.btn-action i { font-size: 15px; }
+.btn-action-admin {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+}
+.btn-action-admin:hover {
+  background: #3a7ae0;
+  color: white;
+  border-color: #3a7ae0;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+.empty-state i {
+  font-size: 48px;
+  color: var(--blue-mid);
+}
+.empty-state p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Responsive projects */
+@media screen and (max-width: 900px) {
+  .projects-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media screen and (max-width: 576px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  #content main .head-actions { flex-direction: column; }
+  .head-actions-right { width: 100%; justify-content: flex-end; }
+}

@@ -1,0 +1,318 @@
+/* ================================================
+   Tableuseer — Component Styles
+   Same design system as projectuser & carteuser
+================================================ */
+
+/* ---- Head actions ---- */
+#content main .head-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+#content main .head-actions h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.head-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Stats chips */
+.stats-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  padding: 8px 16px;
+  min-width: 60px;
+}
+.stats-chip.blue { background: var(--blue-light); }
+.stats-chip.green { background: #D1FAE5; }
+.stats-chip .chip-num {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+.stats-chip.blue .chip-num { color: var(--blue); }
+.stats-chip.green .chip-num { color: #059669; }
+.stats-chip .chip-label {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.stats-chip.blue .chip-label { color: var(--blue); }
+.stats-chip.green .chip-label { color: #059669; }
+
+/* ---- Tables grid ---- */
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+/* ---- Table card ---- */
+.table-card {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(79, 142, 247, 0.10);
+}
+
+/* Card header with accent */
+.table-card-header {
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.table-card-header.accent-0 { background: linear-gradient(135deg, #EBF2FF 0%, #C2D9FF 100%); }
+.table-card-header.accent-1 { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); }
+.table-card-header.accent-2 { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+.table-card-header.accent-3 { background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%); }
+.table-card-header.accent-4 { background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%); }
+
+.table-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+.table-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-index {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.6);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.project-count-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.6);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.project-count-chip i { font-size: 13px; }
+
+/* Card body */
+.table-card-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+.table-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.table-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ---- Inline add project form ---- */
+.add-project-section {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.add-project-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.add-project-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.add-project-title i {
+  font-size: 18px;
+  color: var(--blue);
+}
+.btn-close-form {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: all 0.12s;
+}
+.btn-close-form:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+.add-project-form {
+  padding: 14px 20px;
+}
+.add-project-form .form-group {
+  margin-bottom: 12px;
+}
+.add-project-form .form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.add-project-form .form-group input,
+.add-project-form .form-group textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  resize: vertical;
+}
+.add-project-form .form-group input:focus,
+.add-project-form .form-group textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.10);
+}
+.form-actions-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: var(--blue);
+  color: #fff;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.btn-primary-sm:hover { background: #3a7ae0; }
+.btn-cancel-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-cancel-sm:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+/* Card footer */
+.table-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.btn-action:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-color: var(--blue-mid);
+}
+.btn-action i { font-size: 15px; }
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+.empty-state i {
+  font-size: 48px;
+  color: var(--blue-mid);
+}
+.empty-state p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media screen and (max-width: 900px) {
+  .tables-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media screen and (max-width: 576px) {
+  .tables-grid { grid-template-columns: 1fr; }
+  #content main .head-actions { flex-direction: column; }
+  .head-actions-right { width: 100%; justify-content: flex-end; }
+}

@@ -1,0 +1,278 @@
+<!-- ================================
+     SIDEBAR
+================================ -->
+<section id="sidebar" [ngClass]="{'hide': status}">
+
+  <a href="#" class="brand">
+    <div class="brand-icon"><i class='bx bxs-layer'></i></div>
+    <span>AdminHub</span>
+  </a>
+
+  <p class="nav-section-label">Navigation</p>
+  <ul class="side-menu top">
+    <li class="active">
+      <a routerLink="/Tableuseer">
+        <i class='bx bxs-dashboard'></i><span>Table</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/Projectuser">
+        <i class='bx bxs-shopping-bag'></i><span>Projects</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/Carteuser">
+        <i class='bx bxs-card'></i><span>Carte</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-message-dots'></i><span>Messages</span>
+        <span class="menu-badge">3</span>
+      </a>
+    </li>
+  </ul>
+
+  <p class="nav-section-label">Account</p>
+  <ul class="side-menu">
+    <li>
+      <a (click)="toggleUpdateForm()">
+        <i class='bx bxs-user-circle'></i><span>Profil</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-group'></i><span>Team</span>
+      </a>
+    </li>
+    <li [hidden]="!isAdmin">
+      <a routerLink="/admin">
+        <i class='bx bxs-shield'></i><span>Admin Space</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-cog'></i><span>Settings</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <a class="logout-link" (click)="logout()">
+      <i class='bx bxs-log-out-circle'></i><span>Logout</span>
+    </a>
+  </div>
+
+</section>
+
+
+<!-- ================================
+     CONTENT
+================================ -->
+<section id="content">
+
+  <!-- NAVBAR -->
+  <nav>
+    <i class='bx bx-menu' (click)="addToggle()" style="cursor:pointer;font-size:22px;color:var(--text-muted);"></i>
+    <span class="page-title">Tables</span>
+
+    <div class="search-wrap">
+      <i class='bx bx-search'></i>
+      <input type="search" placeholder="Search tables...">
+    </div>
+
+    <div class="nav-icon" *ngIf="isAdmin" (click)="toggleTableForm()" title="Create Table">
+      <i class='bx bx-plus-circle'></i>
+    </div>
+
+    <div class="nav-icon">
+      <i class='bx bxs-bell'></i>
+      <div class="notif-dot"></div>
+    </div>
+
+    <div class="avatar">
+      <img *ngIf="profileImage" [src]="profileImage" alt="Profil">
+      <span *ngIf="!profileImage">AD</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main [class.hide-main]="showUpdateForm">
+
+    <!-- En-tête -->
+    <div class="head-actions">
+      <div>
+        <h1>Tables & Projects</h1>
+        <div class="breadcrumb">
+          <span>Dashboard</span>
+          <span class="sep">&#8250;</span>
+          <a class="active" routerLink="/home">Home</a>
+          <span class="sep">&#8250;</span>
+          <span class="active">Tables</span>
+        </div>
+      </div>
+
+      <div class="head-actions-right">
+        <!-- Compteurs -->
+        <div class="stats-chip blue">
+          <span class="chip-num">{{ tableaux.length }}</span>
+          <span class="chip-label">Tables</span>
+        </div>
+        <div class="stats-chip green">
+          <span class="chip-num">{{ projects.length }}</span>
+          <span class="chip-label">Projects</span>
+        </div>
+        <!-- Bouton create table admin -->
+        <a class="create-btn" (click)="showTableForm()" [hidden]="!isAdmin">
+          <i class='bx bx-plus'></i> New Table
+        </a>
+      </div>
+    </div>
+
+    <!-- Grille des tableaux -->
+    <div class="tables-grid" *ngIf="tableaux.length > 0; else noTables">
+      <div class="table-card" *ngFor="let tableau of tableaux; let i = index">
+
+        <!-- Header de la carte -->
+        <div class="table-card-header" [ngClass]="'accent-' + (i % 5)">
+          <div class="table-avatar">
+            {{ tableau.nom?.charAt(0)?.toUpperCase() || 'T' }}
+          </div>
+          <div class="table-meta">
+            <span class="table-index">#{{ i + 1 }}</span>
+            <span class="project-count-chip" *ngIf="tableau.projets?.length">
+              <i class='bx bxs-folder'></i> {{ tableau.projets.length }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Contenu -->
+        <div class="table-card-body">
+          <h2 class="table-title">{{ tableau.nom }}</h2>
+          <p class="table-desc" *ngIf="tableau.description">{{ tableau.description }}</p>
+        </div>
+
+        <!-- Formulaire ajout projet (inline) -->
+        <div class="add-project-section" *ngIf="showForm && selectedTableauId === tableau.idTableau">
+          <div class="add-project-header">
+            <div class="add-project-title">
+              <i class='bx bx-plus-circle'></i>
+              <span>New project in <strong>{{ tableau.nom }}</strong></span>
+            </div>
+            <button class="btn-close-form" (click)="showForm = false; selectedTableauId = null">
+              <i class='bx bx-x'></i>
+            </button>
+          </div>
+          <form class="add-project-form" (ngSubmit)="onSubmitProject()">
+            <div class="form-group">
+              <label for="projNom">Project name</label>
+              <input type="text" id="projNom" name="nom"
+                     [(ngModel)]="newProject.nom" placeholder="Project name..." required>
+            </div>
+            <div class="form-group">
+              <label for="projDesc">Description</label>
+              <textarea id="projDesc" name="description"
+                        [(ngModel)]="newProject.description" placeholder="Description..." rows="2"></textarea>
+            </div>
+            <div class="form-actions-inline">
+              <button type="submit" class="btn-primary-sm">
+                <i class='bx bx-plus'></i> Add Project
+              </button>
+              <button type="button" class="btn-cancel-sm" (click)="showForm = false; selectedTableauId = null">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="table-card-footer">
+          <button class="btn-action" *ngIf="isAdmin" (click)="showProjectForm(tableau)" title="Add project">
+            <i class='bx bx-plus-circle'></i>
+            <span>Add Project</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- État vide : aucun tableau -->
+    <ng-template #noTables>
+      <div class="empty-state">
+        <i class='bx bx-table'></i>
+        <p>No tables found.</p>
+        <a class="create-btn" (click)="showTableForm()" *ngIf="isAdmin">
+          <i class='bx bx-plus'></i> Create your first table
+        </a>
+      </div>
+    </ng-template>
+
+  </main>
+</section>
+
+
+<!-- ================================
+     MODAL : EDIT PROFILE
+================================ -->
+<div class="modal-overlay" *ngIf="showUpdateForm" (click)="toggleUpdateForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Edit Profile</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="profile-picture" *ngIf="profileImage">
+        <img [src]="profileImage" alt="Photo de profil" class="profile-image">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" [value]="userForm.email" disabled>
+      </div>
+      <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname" name="firstname"
+               [(ngModel)]="userForm.firstname" placeholder="Your first name" required>
+      </div>
+      <div class="form-group">
+        <label for="password">New Password</label>
+        <input type="password" id="password" name="password"
+               [(ngModel)]="userForm.password" placeholder="New password">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleUpdateForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-check'></i> Update
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ================================
+     MODAL : CREATE TABLE
+================================ -->
+<div class="modal-overlay" *ngIf="displayTableForm" (click)="toggleTableForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Create Table</h2>
+    <form (ngSubmit)="onSubmitTableau()">
+      <div class="form-group">
+        <label for="nom">Name</label>
+        <input type="text" id="nom" name="nom"
+               [(ngModel)]="tableForm.nom" placeholder="Table name" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description"
+                  [(ngModel)]="tableForm.description" placeholder="Description..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleTableForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-plus'></i> Create
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

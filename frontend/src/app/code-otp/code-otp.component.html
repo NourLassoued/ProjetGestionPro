@@ -1,0 +1,157 @@
+<!-- code-otp.component.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify</title>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'>
+  <!-- Add Angular Material CSS (if not already added) -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/@angular/material/13.2.0/prebuilt-themes/indigo-pink.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/@angular/material/13.2.0/prebuilt-themes/indigo-pink.css" rel="stylesheet">
+
+ <style>
+    /* Custom styles */
+    body {
+      background: #6a11cb; /* Fallback for older browsers */
+      background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)); /* Chrome 10-25, Safari 5.1-6 */
+      background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .verify-section {
+      width: 100%;
+      max-width: 700px; /* Adjust section width as needed */
+      height: 400px; /* Card height */
+      background-color: white; /* Semi-transparent white background */
+      border-radius: 8px;
+      box-shadow: 0 12px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    
+
+    .otp-field {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .otp-field input {
+      height: 55px; /* OTP input field height */
+      width: 55px; /* OTP input field width */
+      border-radius: 6px;
+      outline: none;
+      font-size: 1.125rem;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .otp-field input:focus {
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .otp-field input::-webkit-inner-spin-button,
+    .otp-field input::-webkit-outer-spin-button {
+      display: none;
+    }
+
+    .resend {
+      font-size: 12px;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: black;
+      font-size: 12px;
+      text-align: right;
+      font-family: monospace;
+    }
+
+    .footer a {
+      color: black;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="verify-section">
+    <div class="card bg-white mb-5 mt-5 border-0">
+      <div class="card-body p-5 text-center">
+        <h1>Verify</h1>
+        <p>Your code was sent to you via email</p>
+
+        <!-- Email Input -->
+        <div class="form-group mb-4">
+          <input type="email" class="form-control" id="inputEmail" placeholder="Enter your email" [value]="email" disabled>
+        </div>
+
+        <!-- OTP Input Fields -->
+        <div class="otp-field mb-4">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[0]">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[1]">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[2]">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[3]">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[4]">
+          <input type="number" class="form-control" placeholder="0" maxlength="1" [(ngModel)]="otp[5]">
+        </div>
+
+        <!-- Verify Button -->
+        <button class="btn btn-primary mb-3" (click)="verifyOtp()">
+          Verify
+        </button>
+        <div *ngIf="otpVerified">
+          <h2>Change Password</h2>
+        
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+        
+          <div *ngIf="successMessage" class="alert alert-success" role="alert">
+            {{ successMessage }}
+          </div>
+        
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" id="email" class="form-control" [(ngModel)]="email" placeholder="Enter your email">
+          </div>
+        
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" class="form-control" [(ngModel)]="newPassword" placeholder="New Password">
+          </div>
+        
+          <div class="form-group">
+            <label for="repeatPassword">Repeat Password</label>
+            <input type="password" id="repeatPassword" class="form-control" [(ngModel)]="repeatPassword" placeholder="Repeat Password">
+          </div>
+        
+          <button class="btn btn-primary" (click)="changePassword()">Change Password</button>
+        </div>
+        
+        <!-- Resend Code Link -->
+        <p class="resend text-muted mb-0">
+          Didn't receive code? <a href="#">Request again</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

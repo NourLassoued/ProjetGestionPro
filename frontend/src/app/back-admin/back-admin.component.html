@@ -1,0 +1,286 @@
+<!-- ================================
+     SIDEBAR
+================================ -->
+<section id="sidebar" [ngClass]="{'hide': status}">
+
+  <a href="#" class="brand">
+    <div class="brand-icon"><i class='bx bxs-layer'></i></div>
+    <span>AdminHub</span>
+  </a>
+
+  <p class="nav-section-label">Navigation</p>
+  <ul class="side-menu top">
+    <li [hidden]="!isAdmin">
+      <a routerLink="/Tableuseer">
+        <i class='bx bxs-dashboard'></i><span>Table</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/Projectuser">
+        <i class='bx bxs-shopping-bag'></i><span>Projects</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/Carteuser">
+        <i class='bx bxs-card'></i><span>Carte</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-message-dots'></i><span>Messages</span>
+        <span class="menu-badge">3</span>
+      </a>
+    </li>
+  </ul>
+
+  <p class="nav-section-label">Account</p>
+  <ul class="side-menu">
+    <li>
+      <a (click)="toggleUpdateForm()">
+        <i class='bx bxs-user-circle'></i><span>Profil</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-group'></i><span>Team</span>
+      </a>
+    </li>
+    <li class="active">
+      <a routerLink="/admin">
+        <i class='bx bxs-shield'></i><span>Admin Space</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <i class='bx bxs-cog'></i><span>Settings</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <a class="logout-link" (click)="logout()">
+      <i class='bx bxs-log-out-circle'></i><span>Logout</span>
+    </a>
+  </div>
+
+</section>
+
+
+<!-- ================================
+     CONTENT
+================================ -->
+<section id="content">
+
+  <!-- NAVBAR -->
+  <nav>
+    <i class='bx bx-menu' (click)="addToggle()" style="cursor:pointer;font-size:22px;color:var(--text-muted);"></i>
+    <span class="page-title">Admin Space</span>
+
+    <div class="search-wrap">
+      <i class='bx bx-search'></i>
+      <input type="search" placeholder="Search users...">
+    </div>
+
+    <div class="nav-icon" *ngIf="isAdmin" (click)="toggleTableForm()" title="Create Table">
+      <i class='bx bx-table'></i>
+    </div>
+
+    <div class="nav-icon">
+      <i class='bx bxs-bell'></i>
+      <div class="notif-dot"></div>
+    </div>
+
+    <div class="avatar">
+      <img *ngIf="profileImage" [src]="profileImage" alt="Profil">
+      <span *ngIf="!profileImage">AD</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main [class.hide-main]="showUpdateForm">
+
+    <!-- En-tête -->
+    <div class="head-actions">
+      <div>
+        <h1>User Management</h1>
+        <div class="breadcrumb">
+          <span>Dashboard</span>
+          <span class="sep">&#8250;</span>
+          <a class="active" routerLink="/home">Home</a>
+          <span class="sep">&#8250;</span>
+          <span class="active">Admin</span>
+        </div>
+      </div>
+
+      <div class="head-actions-right">
+        <div class="stats-chip blue">
+          <span class="chip-num">{{ users.length }}</span>
+          <span class="chip-label">Users</span>
+        </div>
+        <a class="create-btn" (click)="showTableForm()">
+          <i class='bx bx-plus'></i> New Table
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i class='bx bxs-group'></i></div>
+        <div>
+          <h3>{{ users.length }}</h3>
+          <p>Total Users</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"><i class='bx bxs-shield'></i></div>
+        <div>
+          <h3>{{ countByRole('ADMINISTRATEUR') }}</h3>
+          <p>Admins</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class='bx bxs-user'></i></div>
+        <div>
+          <h3>{{ countByRole('MEMBRE') }}</h3>
+          <p>Members</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><i class='bx bxs-show'></i></div>
+        <div>
+          <h3>{{ countByRole('OBSERVATEUR') }}</h3>
+          <p>Observers</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users table -->
+    <div class="users-panel" *ngIf="users.length > 0; else noUsers">
+      <div class="panel-head">
+        <h3><i class='bx bxs-group'></i> All Users</h3>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users; let i = index">
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar" [ngClass]="'accent-' + (i % 5)">
+                    <img *ngIf="user.image" [src]="getImageUrl(user.image)" alt="">
+                    <span *ngIf="!user.image">{{ user.firstname?.charAt(0)?.toUpperCase() || 'U' }}</span>
+                  </div>
+                  <span class="user-name">{{ user.firstname || 'No name' }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="user-email">{{ user.email }}</span>
+              </td>
+              <td>
+                <select class="role-select"
+                        [(ngModel)]="user.role"
+                        (change)="onRoleChange(user)"
+                        [ngClass]="{
+                          'role-admin': user.role === 'ADMINISTRATEUR',
+                          'role-member': user.role === 'MEMBRE',
+                          'role-observer': user.role === 'OBSERVATEUR'
+                        }">
+                  <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                </select>
+              </td>
+              <td>
+                <button class="btn-delete" (click)="deleteUser(user)" title="Delete user">
+                  <i class='bx bx-trash'></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <ng-template #noUsers>
+      <div class="empty-state">
+        <i class='bx bx-group'></i>
+        <p>No users found.</p>
+      </div>
+    </ng-template>
+
+  </main>
+</section>
+
+
+<!-- ================================
+     MODAL : EDIT PROFILE
+================================ -->
+<div class="modal-overlay" *ngIf="showUpdateForm" (click)="toggleUpdateForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Edit Profile</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="profile-picture" *ngIf="profileImage">
+        <img [src]="profileImage" alt="Photo de profil" class="profile-image">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" [value]="userForm.email" disabled>
+      </div>
+      <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname" name="firstname"
+               [(ngModel)]="userForm.firstname" placeholder="Your first name" required>
+      </div>
+      <div class="form-group">
+        <label for="password">New Password</label>
+        <input type="password" id="password" name="password"
+               [(ngModel)]="userForm.password" placeholder="New password">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleUpdateForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-check'></i> Update
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ================================
+     MODAL : CREATE TABLE
+================================ -->
+<div class="modal-overlay" *ngIf="displayTableForm" (click)="toggleTableForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Create Table</h2>
+    <form (ngSubmit)="onSubmitTableau()">
+      <div class="form-group">
+        <label for="nom">Name</label>
+        <input type="text" id="nom" name="nom"
+               [(ngModel)]="tableForm.nom" placeholder="Table name" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description"
+                  [(ngModel)]="tableForm.description" placeholder="Description..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleTableForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-plus'></i> Create
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

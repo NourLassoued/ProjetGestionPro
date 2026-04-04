@@ -1,0 +1,300 @@
+<!-- ================================
+     SIDEBAR
+================================ -->
+<section id="sidebar" [ngClass]="{'hide': status}">
+  <a href="#" class="brand">
+    <div class="brand-icon"><i class='bx bxs-layer'></i></div>
+    <span>AdminHub</span>
+  </a>
+  <p class="nav-section-label">Navigation</p>
+  <ul class="side-menu top">
+    <li [hidden]="!isAdmin">
+      <a routerLink="/Tableuseer"><i class='bx bxs-dashboard'></i><span>Table</span></a>
+    </li>
+    <li>
+      <a routerLink="/Projectuser"><i class='bx bxs-shopping-bag'></i><span>Projects</span></a>
+    </li>
+    <li class="active">
+      <a routerLink="/Carteuser"><i class='bx bxs-card'></i><span>Carte</span></a>
+    </li>
+    <li>
+      <a href="#"><i class='bx bxs-message-dots'></i><span>Messages</span><span class="menu-badge">3</span></a>
+    </li>
+  </ul>
+  <p class="nav-section-label">Account</p>
+  <ul class="side-menu">
+    <li><a (click)="toggleUpdateForm()"><i class='bx bxs-user-circle'></i><span>Profil</span></a></li>
+    <li><a href="#"><i class='bx bxs-group'></i><span>Team</span></a></li>
+    <li [hidden]="!isAdmin"><a routerLink="/admin"><i class='bx bxs-shield'></i><span>Admin Space</span></a></li>
+    <li><a href="#"><i class='bx bxs-cog'></i><span>Settings</span></a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <a class="logout-link" (click)="logout()"><i class='bx bxs-log-out-circle'></i><span>Logout</span></a>
+  </div>
+</section>
+
+<!-- ================================
+     CONTENT
+================================ -->
+<section id="content">
+
+  <!-- NAVBAR -->
+  <nav>
+    <i class='bx bx-menu' (click)="addToggle()" style="cursor:pointer;font-size:22px;color:var(--text-muted);"></i>
+    <span class="page-title">Kanban Board</span>
+    <div class="search-wrap">
+      <i class='bx bx-search'></i>
+      <input type="search" placeholder="Search cards...">
+    </div>
+    <div class="nav-icon">
+      <i class='bx bxs-bell'></i>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="avatar">
+      <img *ngIf="profileImage" [src]="profileImage" alt="Profil">
+      <span *ngIf="!profileImage">AD</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main [class.hide-main]="showUpdateForm">
+
+    <!-- Header -->
+    <div class="head-actions">
+      <div>
+        <h1>Kanban Board</h1>
+        <div class="breadcrumb">
+          <span>Dashboard</span>
+          <span class="sep">&#8250;</span>
+          <a class="active" routerLink="/home">Home</a>
+          <span class="sep">&#8250;</span>
+          <span class="active">Cards</span>
+        </div>
+      </div>
+      <div class="head-actions-right">
+        <div class="stats-chip blue">
+          <span class="chip-num">{{ projetsUtilisateur.length }}</span>
+          <span class="chip-label">Projects</span>
+        </div>
+        <div class="stats-chip green">
+          <span class="chip-num">{{ cartesDuProjet.length }}</span>
+          <span class="chip-label">Cards</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project tabs -->
+    <div class="section-label" *ngIf="projetsUtilisateur.length > 0">
+      <i class='bx bxs-folder-open'></i> Select a project
+    </div>
+
+    <div class="projects-strip" *ngIf="projetsUtilisateur.length > 0">
+      <button class="project-tab"
+              *ngFor="let projet of projetsUtilisateur; let i = index"
+              [class.active]="projetSelectionne?.idProjet === projet.idProjet"
+              (click)="selectionnerProjet(projet)">
+        <div class="tab-avatar" [ngClass]="'accent-' + (i % 5)">
+          {{ projet.nom?.charAt(0)?.toUpperCase() || 'P' }}
+        </div>
+        <span class="tab-name">{{ projet.nom }}</span>
+      </button>
+    </div>
+
+    <div class="empty-state" *ngIf="projetsUtilisateur.length === 0">
+      <i class='bx bx-folder-open'></i>
+      <p>You are not assigned to any project yet.</p>
+    </div>
+
+    <!-- Add card form -->
+    <div class="add-card-section" *ngIf="projetSelectionne">
+      <div class="add-card-header">
+        <div class="add-card-title">
+          <i class='bx bx-plus-circle'></i>
+          <span>Add a card to <strong>{{ projetSelectionne.nom }}</strong></span>
+        </div>
+        <button class="btn-close-card" (click)="projetSelectionne = null">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <form class="add-card-form" (ngSubmit)="ajouterCarteAProjet()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="titre">Title</label>
+            <input type="text" id="titre" name="titre"
+                   [(ngModel)]="nouvelleCarte.titre" placeholder="Card title..." required>
+          </div>
+          <div class="form-group flex-2">
+            <label for="desc">Description</label>
+            <input type="text" id="desc" name="description"
+                   [(ngModel)]="nouvelleCarte.description" placeholder="Short description...">
+          </div>
+          <button type="submit" class="btn-add-card">
+            <i class='bx bx-plus'></i> Add
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ================================
+         KANBAN BOARD
+    ================================ -->
+    <div class="kanban-board" *ngIf="projetSelectionne && cartesDuProjet.length > 0">
+
+      <!-- Column: À FAIRE (rouge) -->
+      <div class="kanban-column col-afaire"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'A_FAIRE')">
+        <div class="kanban-column-header">
+          <div class="col-dot dot-red"></div>
+          <h3>À Faire</h3>
+          <span class="col-count">{{ cartesAFaire.length }}</span>
+        </div>
+        <div class="kanban-cards">
+          <div class="kanban-card card-red"
+               *ngFor="let carte of cartesAFaire; let i = index"
+               draggable="true"
+               (dragstart)="onDragStart(carte)"
+               (dragend)="onDragEnd()">
+            <span class="card-index">#{{ i + 1 }}</span>
+            <h4>{{ carte.titre }}</h4>
+            <p *ngIf="carte.description">{{ carte.description }}</p>
+            <div class="card-footer" *ngIf="carte.dateCreation">
+              <i class='bx bx-calendar'></i>
+              {{ carte.dateCreation | date:'dd MMM' }}
+            </div>
+          </div>
+          <div class="kanban-empty" *ngIf="cartesAFaire.length === 0">
+            <p>Drop cards here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column: EN COURS (orange) -->
+      <div class="kanban-column col-encours"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'EN_COURS')">
+        <div class="kanban-column-header">
+          <div class="col-dot dot-orange"></div>
+          <h3>En Cours</h3>
+          <span class="col-count">{{ cartesEnCours.length }}</span>
+        </div>
+        <div class="kanban-cards">
+          <div class="kanban-card card-orange"
+               *ngFor="let carte of cartesEnCours; let i = index"
+               draggable="true"
+               (dragstart)="onDragStart(carte)"
+               (dragend)="onDragEnd()">
+            <span class="card-index">#{{ i + 1 }}</span>
+            <h4>{{ carte.titre }}</h4>
+            <p *ngIf="carte.description">{{ carte.description }}</p>
+            <div class="card-footer" *ngIf="carte.dateCreation">
+              <i class='bx bx-calendar'></i>
+              {{ carte.dateCreation | date:'dd MMM' }}
+            </div>
+          </div>
+          <div class="kanban-empty" *ngIf="cartesEnCours.length === 0">
+            <p>Drop cards here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column: TERMINÉ (vert) -->
+      <div class="kanban-column col-termine"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'TERMINE')">
+        <div class="kanban-column-header">
+          <div class="col-dot dot-green"></div>
+          <h3>Terminé</h3>
+          <span class="col-count">{{ cartesTermine.length }}</span>
+        </div>
+        <div class="kanban-cards">
+          <div class="kanban-card card-green"
+               *ngFor="let carte of cartesTermine; let i = index"
+               draggable="true"
+               (dragstart)="onDragStart(carte)"
+               (dragend)="onDragEnd()">
+            <span class="card-index">#{{ i + 1 }}</span>
+            <h4>{{ carte.titre }}</h4>
+            <p *ngIf="carte.description">{{ carte.description }}</p>
+            <div class="card-footer" *ngIf="carte.dateCreation">
+              <i class='bx bx-calendar'></i>
+              {{ carte.dateCreation | date:'dd MMM' }}
+            </div>
+          </div>
+          <div class="kanban-empty" *ngIf="cartesTermine.length === 0">
+            <p>Drop cards here</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Empty: no cards -->
+    <div class="empty-state" *ngIf="projetSelectionne && cartesDuProjet.length === 0">
+      <i class='bx bx-card'></i>
+      <p>No cards yet. Add one above!</p>
+    </div>
+
+  </main>
+</section>
+
+<!-- MODAL: EDIT PROFILE -->
+<div class="modal-overlay" *ngIf="showUpdateForm" (click)="toggleUpdateForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Edit Profile</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="profile-picture" *ngIf="profileImage">
+        <img [src]="profileImage" alt="Photo" class="profile-image">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" [value]="userForm.email" disabled>
+      </div>
+      <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname" name="firstname"
+               [(ngModel)]="userForm.firstname" placeholder="Your first name" required>
+      </div>
+      <div class="form-group">
+        <label for="password">New Password</label>
+        <input type="password" id="password" name="password"
+               [(ngModel)]="userForm.password" placeholder="New password">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleUpdateForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-check'></i> Update
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: CREATE TABLE -->
+<div class="modal-overlay" *ngIf="displayTableForm" (click)="toggleTableForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Create Table</h2>
+    <form (ngSubmit)="onSubmitTableau()">
+      <div class="form-group">
+        <label for="nom">Name</label>
+        <input type="text" id="nom" name="nom"
+               [(ngModel)]="tableForm.nom" placeholder="Table name" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description"
+                  [(ngModel)]="tableForm.description" placeholder="Description..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleTableForm()">
+          <i class='bx bx-x'></i> Cancel
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class='bx bx-plus'></i> Create
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
