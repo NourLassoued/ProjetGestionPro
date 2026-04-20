@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class Tableau {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

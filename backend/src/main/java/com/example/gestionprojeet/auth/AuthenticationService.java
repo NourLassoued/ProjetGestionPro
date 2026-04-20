@@ -11,14 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,40 +32,14 @@ public class AuthenticationService {
 
 
 
-/*
-    public AuthenticationReponse register(RegisterRequest request) {
-
-        var utlisateur  = Utlisateur.builder()
-                .firstname(request.getFirstname())
-
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-      var saveUser=  repository.save(utlisateur);
-        var jwtToken=jwtService.generateToken(utlisateur);
-        var refershToken=jwtService.gererateRefershToken(utlisateur);
-        saveUserToken(saveUser, jwtToken);
-        return  AuthenticationReponse.builder()
-                .accesToken(jwtToken)
-                .refershToken(refershToken)
-                .build();
-
-
-    }
-*/
-
 public AuthenticationReponse register(RegisterRequest request) {
 
-    // Suppose getRole() returns a string representing the role
-    Role role = request.getRole(); // Récupère directement le rôle depuis la requête
+    Role role = request.getRole();
 
-    // Vérifie si le rôle récupéré depuis la requête est null
     if (role == null) {
-        role = Role.getDefaultRole(); // Utilise le rôle par défaut si le rôle est null
+        role = Role.getDefaultRole();
     }
 
-    // Exemple : enregistrer l'utilisateur avec le rôle déterminé
     Utlisateur utilisateur = Utlisateur.builder()
             .firstname(request.getFirstname())
             .email(request.getEmail())
@@ -76,7 +48,6 @@ public AuthenticationReponse register(RegisterRequest request) {
             .image(request.getImage())
             .build();
 
-    // Enregistrer l'utilisateur dans la base de données
 
 
     var saveUser=  repository.save(utilisateur);
@@ -153,7 +124,6 @@ private  void  revokeAllUserToken(Utlisateur user){
                             .refershToken(refreshToken)
                             .build();
 
-                    // Écrire la réponse JSON dans le corps de la réponse HTTP
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.writeValue(response.getOutputStream(), authResponse);
                 }

@@ -3,6 +3,8 @@ package com.example.gestionprojeet.auth;
 import com.example.gestionprojeet.classes.Role;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,7 @@ public class RegisterRequest implements Serializable {
     private  String firstname;
 
     private String email;
+
     private String password;
 private String image;
 private  Role role;

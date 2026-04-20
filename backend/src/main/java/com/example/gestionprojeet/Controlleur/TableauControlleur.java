@@ -1,7 +1,7 @@
 package com.example.gestionprojeet.Controlleur;
 
 import com.example.gestionprojeet.classes.Tableau;
-import com.example.gestionprojeet.service.Tableauservice;
+import com.example.gestionprojeet.Service.Tableauservice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +44,11 @@ public class TableauControlleur {
         public ResponseEntity<List<Tableau>> getTableauxByEmail(@PathVariable String email) {
             return ResponseEntity.ok(tableauService.getTableauxByEmail(email));
         }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(e.getMessage());
+    }
     }
 

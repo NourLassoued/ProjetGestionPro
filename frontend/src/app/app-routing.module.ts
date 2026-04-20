@@ -11,6 +11,8 @@ import { UserprofileComponent } from './userprofile/userprofile.component';
 import { TableuseerComponent } from './tableuseer/tableuseer.component';
 import { ProjectuserComponent } from './projectuser/projectuser.component';
 import { CarteuserComponent } from './carteuser/carteuser.component';
+import { TeamComponent } from './team/team.component';
+import { LandingComponent } from './landing/landing.component';
 
 const routes: Routes = [
 { path: '', redirectTo: '/login', pathMatch: 'full' }, 
@@ -26,7 +28,9 @@ const routes: Routes = [
  {path:'userprofile',component:UserprofileComponent},
  {path:'Tableuseer',component:TableuseerComponent},
  {path:'Projectuser',component:ProjectuserComponent},
- {path:'Carteuser',component:CarteuserComponent}
+ {path:'Carteuser',component:CarteuserComponent},
+  {path:'team',component:TeamComponent},
+  {path:"welcome",component:LandingComponent}
 ];
 
 @NgModule({

@@ -1,4 +1,4 @@
-package com.example.gestionprojeet.service;
+package com.example.gestionprojeet.Service;
 
 import com.example.gestionprojeet.Respository.TableauRepo;
 import com.example.gestionprojeet.Respository.UtlisateurRepo;
@@ -17,7 +17,7 @@ public class Tableauservice {
     private final TableauRepo tableauRepository;
     private final UtlisateurRepo utilisateurRepository;
 
-    // Créer un tableau par ID utilisateur
+
     @Transactional
     public Tableau createTableau(Long userId, Tableau tableau) {
         Utlisateur utilisateur = utilisateurRepository.findById(userId)
@@ -26,7 +26,6 @@ public class Tableauservice {
         return tableauRepository.save(tableau);
     }
 
-    // Créer un tableau par email utilisateur
     @Transactional
     public Tableau createTableauByEmail(String email, Tableau tableau) {
         Utlisateur utilisateur = utilisateurRepository.findByEmail(email)
@@ -35,7 +34,6 @@ public class Tableauservice {
         return tableauRepository.save(tableau);
     }
 
-    // Récupérer les tableaux par ID utilisateur
     @Transactional(readOnly = true)
     public List<Tableau> getTableauxByUtilisateur(Long userId) {
         Utlisateur utilisateur = utilisateurRepository.findById(userId)
@@ -44,7 +42,6 @@ public class Tableauservice {
         return tableaux != null ? tableaux : new ArrayList<>();
     }
 
-    // Récupérer les tableaux par email utilisateur
     @Transactional(readOnly = true)
     public List<Tableau> getTableauxByEmail(String email) {
         Utlisateur utilisateur = utilisateurRepository.findByEmail(email)

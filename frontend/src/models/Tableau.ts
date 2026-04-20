@@ -7,4 +7,5 @@ export class Tableau {
     description?: string;
     proprietaire?: Utilisateur | null; 
     projets!: Projet[];
+    
   }

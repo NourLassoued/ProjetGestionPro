@@ -1,0 +1,261 @@
+<!-- NAVBAR -->
+<nav class="landing-nav">
+  <div class="nav-container">
+    <a class="nav-brand" routerLink="/">
+      <div class="nav-brand-icon"><i class='bx bxs-layer'></i></div>
+      <span>AdminHub</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a routerLink="/login" class="btn-nav-login">Sign In</a>
+      <a routerLink="/register" class="btn-nav-register"><i class='bx bx-user-plus'></i> Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"><div class="hb1"></div><div class="hb2"></div><div class="hb3"></div></div>
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-badge"><i class='bx bxs-rocket'></i> Project Management Made Simple</div>
+      <h1>Organize. Collaborate.<br><span class="grad">Deliver.</span></h1>
+      <p>The all-in-one platform to manage projects, track tasks with Kanban boards, and collaborate in real-time.</p>
+      <div class="hero-btns">
+        <a routerLink="/register" class="btn-primary-lg"><i class='bx bx-rocket'></i> Start Free</a>
+        <a href="#features" class="btn-outline-lg"><i class='bx bx-play-circle'></i> See how it works</a>
+      </div>
+      <div class="hero-nums">
+        <div><strong>500+</strong><span>Projects</span></div>
+        <div class="sep"></div>
+        <div><strong>2,000+</strong><span>Tasks Done</span></div>
+        <div class="sep"></div>
+        <div><strong>150+</strong><span>Teams</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="kanban-mock">
+        <div class="km-bar"><span class="km-dots"><i></i><i></i><i></i></span><span class="km-title">Kanban Board</span></div>
+        <div class="km-cols">
+          <div class="km-col">
+            <div class="km-h"><span class="kd" style="background:#EF4444"></span>To Do<span class="km-c">3</span></div>
+            <div class="km-card"><div class="kl" style="background:#EF4444"></div>Design wireframes</div>
+            <div class="km-card"><div class="kl" style="background:#EF4444"></div>API endpoints</div>
+            <div class="km-card"><div class="kl" style="background:#EF4444"></div>Database schema</div>
+          </div>
+          <div class="km-col">
+            <div class="km-h"><span class="kd" style="background:#F59E0B"></span>In Progress<span class="km-c">2</span></div>
+            <div class="km-card"><div class="kl" style="background:#F59E0B"></div>Frontend layout</div>
+            <div class="km-card"><div class="kl" style="background:#F59E0B"></div>Auth module</div>
+          </div>
+          <div class="km-col">
+            <div class="km-h"><span class="kd" style="background:#10B981"></span>Done<span class="km-c">4</span></div>
+            <div class="km-card"><div class="kl" style="background:#10B981"></div>Project setup</div>
+            <div class="km-card"><div class="kl" style="background:#10B981"></div>User stories</div>
+          </div>
+        </div>
+      </div>
+      <div class="hf hf1"><i class='bx bxs-check-circle' style="color:#10B981"></i> Task completed!</div>
+      <div class="hf hf2"><i class='bx bxs-group' style="color:#4F8EF7"></i> 3 online</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="sec-wrap">
+    <div class="sec-head">
+      <span class="badge-sm">Features</span>
+      <h2>Everything you need to <span class="grad">manage your projects</span></h2>
+      <p>Powerful tools designed to help teams work smarter.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="fi fi-blue"><i class='bx bxs-layout'></i></div>
+        <h3>Kanban Boards</h3>
+        <p>Drag & drop tasks between To Do, In Progress, Done. Visual workflow for everyone.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fi fi-green"><i class='bx bxs-chat'></i></div>
+        <h3>Team Chat</h3>
+        <p>Real-time messaging per project. Discuss, share updates, and decide together.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fi fi-purple"><i class='bx bxs-bar-chart-alt-2'></i></div>
+        <h3>Dashboard</h3>
+        <p>Track progress with visual stats — completion rates, task distribution, progress bars.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fi fi-orange"><i class='bx bxs-user-badge'></i></div>
+        <h3>Role Management</h3>
+        <p>Admin, Member, Observer — assign roles and control access. Secure and flexible.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fi fi-red"><i class='bx bxs-card'></i></div>
+        <h3>Smart Cards</h3>
+        <p>Each card tracks title, description, deadline, status, and auto-detects the author.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fi fi-amber"><i class='bx bxs-table'></i></div>
+        <h3>Tables & Projects</h3>
+        <p>Hierarchical structure: Tables → Projects → Cards. Perfect for complex workflows.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="sec-wrap">
+    <div class="sec-head">
+      <span class="badge-sm">How it works</span>
+      <h2>Get started in <span class="grad">3 simple steps</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-i"><i class='bx bxs-user-plus'></i></div>
+        <h3>Create Account</h3>
+        <p>Free sign-up with email. No credit card required.</p>
+      </div>
+      <div class="step-arrow"><i class='bx bx-right-arrow-alt'></i></div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-i"><i class='bx bxs-folder-plus'></i></div>
+        <h3>Set Up Project</h3>
+        <p>Create tables, projects, invite members by email.</p>
+      </div>
+      <div class="step-arrow"><i class='bx bx-right-arrow-alt'></i></div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-i"><i class='bx bxs-rocket'></i></div>
+        <h3>Track & Deliver</h3>
+        <p>Kanban boards, team chat, progress tracking.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM COLLABORATION -->
+<section class="team-sec" id="team">
+  <div class="sec-wrap">
+    <div class="sec-head">
+      <span class="badge-sm">Team Collaboration</span>
+      <h2>Work together, <span class="grad">deliver faster</span></h2>
+      <p>Built for teams of all sizes. Stay connected, aligned, and productive.</p>
+    </div>
+
+    <div class="team-grid">
+
+      <!-- Chat preview card (large) -->
+      <div class="team-chat-card">
+        <div class="tcc-label"><i class='bx bxs-chat'></i> Project Chat</div>
+        <div class="tcc-head">
+          <div class="tcc-avatar a-blue">P</div>
+          <div><div class="tcc-name">Project Alpha</div><div class="tcc-sub">4 members · 12 messages today</div></div>
+          <div class="tcc-online"><span class="online-dot"></span> 3 online</div>
+        </div>
+        <div class="tcc-msgs">
+          <div class="tcc-msg tcc-other">
+            <div class="tcc-ma a-green">S</div>
+            <div class="tcc-mb">
+              <div class="tcc-ms">Sara · <span>14:32</span></div>
+              <div class="tcc-bubble">I just finished the API endpoints. Ready for review! <i class='bx bxs-check-double' style="color:#10B981;margin-left:4px;"></i></div>
+            </div>
+          </div>
+          <div class="tcc-msg tcc-mine">
+            <div class="tcc-mb">
+              <div class="tcc-bubble mine">Great! I'll review them this afternoon. <i class='bx bxs-check-double' style="color:rgba(255,255,255,0.6);margin-left:4px;"></i></div>
+              <div class="tcc-ms right">You · <span>14:35</span></div>
+            </div>
+          </div>
+          <div class="tcc-msg tcc-other">
+            <div class="tcc-ma a-amber">M</div>
+            <div class="tcc-mb">
+              <div class="tcc-ms">Marc · <span>14:38</span></div>
+              <div class="tcc-bubble">I moved the auth card to <strong>Done</strong> <i class='bx bxs-check-circle' style="color:#10B981;margin-left:2px;"></i></div>
+            </div>
+          </div>
+          <div class="tcc-msg tcc-other">
+            <div class="tcc-ma a-purple">L</div>
+            <div class="tcc-mb">
+              <div class="tcc-ms">Lina · <span>14:41</span></div>
+              <div class="tcc-bubble">Starting the frontend tests now.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tcc-input">
+          <div class="tcc-input-box">
+            <i class='bx bx-paperclip'></i>
+            <span>Type a message...</span>
+            <i class='bx bxs-send' style="color:#4F8EF7;"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature cards (right side) -->
+      <div class="team-feat-cards">
+        <div class="tf-card">
+          <div class="tf-icon tf-i-blue"><i class='bx bxs-chat'></i></div>
+          <div>
+            <h4>Project-Based Chat</h4>
+            <p>Each project has its own private chat room. Only assigned members can send and read messages.</p>
+          </div>
+        </div>
+        <div class="tf-card">
+          <div class="tf-icon tf-i-purple"><i class='bx bxs-shield'></i></div>
+          <div>
+            <h4>Three Roles</h4>
+            <p><strong>Admin</strong> — full control. <strong>Member</strong> — create & move tasks. <strong>Observer</strong> — view only.</p>
+          </div>
+        </div>
+        <div class="tf-card">
+          <div class="tf-icon tf-i-green"><i class='bx bxs-user-plus'></i></div>
+          <div>
+            <h4>Invite by Email</h4>
+            <p>Add any registered user to your project instantly. Easy team onboarding.</p>
+          </div>
+        </div>
+        <div class="tf-card">
+          <div class="tf-icon tf-i-amber"><i class='bx bxs-user-circle'></i></div>
+          <div>
+            <h4>Author Tracking</h4>
+            <p>Every card shows who created it — name and profile picture. Full transparency.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-box">
+    <div class="cta-bg1"></div><div class="cta-bg2"></div>
+    <h2>Ready to streamline your projects?</h2>
+    <p>Join hundreds of teams already using AdminHub.</p>
+    <div class="cta-btns">
+      <a routerLink="/register" class="btn-cta-w"><i class='bx bx-rocket'></i> Get Started — Free</a>
+      <a routerLink="/login" class="btn-cta-o">Sign In <i class='bx bx-right-arrow-alt'></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="nav-brand"><div class="nav-brand-icon"><i class='bx bxs-layer'></i></div><span>AdminHub</span></div>
+      <p>The simplest way to manage projects and collaborate.</p>
+    </div>
+    <div class="foot-col"><h4>Product</h4><a href="#features">Features</a><a href="#how">How it works</a><a href="#team">Team</a></div>
+    <div class="foot-col"><h4>Account</h4><a routerLink="/login">Sign In</a><a routerLink="/register">Register</a></div>
+    <div class="foot-col"><h4>Connect</h4><a href="#"><i class='bx bxl-github'></i> GitHub</a><a href="#"><i class='bx bxl-linkedin'></i> LinkedIn</a></div>
+  </div>
+  <div class="foot-bottom">&copy; 2026 AdminHub. All rights reserved.</div>
+</footer>

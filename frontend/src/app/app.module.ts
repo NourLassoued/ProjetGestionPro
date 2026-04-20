@@ -24,6 +24,9 @@ import { UserprofileComponent } from './userprofile/userprofile.component';
 import { TableuseerComponent } from './tableuseer/tableuseer.component';
 import { ProjectuserComponent } from './projectuser/projectuser.component';
 import { CarteuserComponent } from './carteuser/carteuser.component';
+import { TeamComponent } from './team/team.component';
+import { LandingComponent } from './landing/landing.component';
+
 
 
 @NgModule({
@@ -40,6 +43,11 @@ import { CarteuserComponent } from './carteuser/carteuser.component';
     TableuseerComponent,
     ProjectuserComponent,
     CarteuserComponent,
+    TeamComponent,
+    LandingComponent
+
+    
+    
   
  
   ],

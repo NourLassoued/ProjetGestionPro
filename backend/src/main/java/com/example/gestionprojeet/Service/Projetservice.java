@@ -1,19 +1,17 @@
-package com.example.gestionprojeet.service;
+package com.example.gestionprojeet.Service;
 
 import com.example.gestionprojeet.Respository.CarteRepo;
 import com.example.gestionprojeet.Respository.ProjetRepo;
 import com.example.gestionprojeet.Respository.TableauRepo;
 import com.example.gestionprojeet.Respository.UtlisateurRepo;
-import com.example.gestionprojeet.classes.Carte;
-import com.example.gestionprojeet.classes.Projet;
-import com.example.gestionprojeet.classes.Tableau;
-import com.example.gestionprojeet.classes.Utlisateur;
+import com.example.gestionprojeet.classes.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +26,16 @@ public class Projetservice {
 
     @Transactional
     public Projet createProject(Long idTableau, Projet projet) {
+        Utlisateur currentUser = getCurrentUser();
+
+        if (currentUser == null) {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+
+        if (currentUser.getRole() != Role.ADMINISTRATEUR) {
+            throw new RuntimeException("Accès refusé : seul un administrateur peut créer un projet");
+        }
+
         Tableau tableau = tableauRepository.findById(idTableau)
                 .orElseThrow(() -> new RuntimeException("Tableau non trouvé avec l'id : " + idTableau));
         projet.setTableau(tableau);
@@ -45,24 +53,49 @@ public class Projetservice {
     public Projet getProjetById(Long id) {
         Projet projet = projetRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id : " + id));
+
+        Utlisateur currentUser = getCurrentUser();
+
+        if (currentUser == null) {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+
+        if (currentUser.getRole() == Role.ADMINISTRATEUR) {
+            projet.getUtilisateurs().size();
+            return projet;
+        }
+
+        boolean isMember = projet.getUtilisateurs() != null &&
+                projet.getUtilisateurs().stream()
+                        .anyMatch(u -> u.getId().equals(currentUser.getId()));
+
+        if (!isMember) {
+            throw new RuntimeException("Accès refusé : vous n'êtes pas membre de ce projet");
+        }
+
         projet.getUtilisateurs().size();
         return projet;
     }
-
     @Transactional
     public Projet ajouterUtilisateurAuProjetParEmail(String email, Long idProjet) {
         Utlisateur utilisateur = utilisateurRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + email));
+                .orElseThrow(() -> new RuntimeException("Non trouvé"));
 
         Projet projet = projetRepository.findById(idProjet)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id : " + idProjet));
+                .orElseThrow(() -> new RuntimeException("Non trouvé"));
 
-        boolean dejaMembre = projet.getUtilisateurs().stream()
-                .anyMatch(u -> u.getId().equals(utilisateur.getId()));
-        if (dejaMembre) {
-            throw new RuntimeException("L'utilisateur est déjà membre de ce projet.");
+        if (utilisateur.getProjets() == null) {
+            utilisateur.setProjets(new ArrayList<>());
+        }
+        if (projet.getUtilisateurs() == null) {
+            projet.setUtilisateurs(new ArrayList<>());
         }
 
+        if (utilisateur.getProjets().contains(projet)) {
+            throw new RuntimeException("Utilisateur déjà ajouté");
+        }
+
+        // Maintenant safe d'ajouter
         utilisateur.getProjets().add(projet);
         projet.getUtilisateurs().add(utilisateur);
 
@@ -137,4 +170,49 @@ public class Projetservice {
         }
         return null;
     }
+    @Transactional
+    public Projet updateProjet(Long id, Projet projetDetails) {
+        Utlisateur currentUser = getCurrentUser();
+
+        if (currentUser == null) {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+
+        if (currentUser.getRole() != Role.ADMINISTRATEUR) {
+            throw new RuntimeException("Accès refusé : seul un administrateur peut modifier un projet");
+        }
+
+        Projet projet = projetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id : " + id));
+
+        if (projetDetails.getNom() != null) {
+            projet.setNom(projetDetails.getNom());
+        }
+        if (projetDetails.getDescription() != null) {
+            projet.setDescription(projetDetails.getDescription());
+        }
+
+        return projetRepository.save(projet);
+    }
+    public void deleteProjet(Long id) {
+        // Récupérer utilisateur connecté
+        Utlisateur currentUser = getCurrentUser();
+
+        if (currentUser == null) {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+
+        if (currentUser.getRole() != Role.ADMINISTRATEUR) {
+            throw new RuntimeException("Accès refusé: seul un administrateur peut supprimer");
+        }
+
+        // Vérifier que le projet existe
+        if (!projetRepository.existsById(id)) {
+            throw new RuntimeException("Projet non trouvé");
+        }
+
+        // Supprimer le projet
+        projetRepository.deleteById(id);
+    }
+
 }

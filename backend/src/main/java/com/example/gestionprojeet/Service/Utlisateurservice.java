@@ -1,4 +1,4 @@
-package com.example.gestionprojeet.service;
+package com.example.gestionprojeet.Service;
 
 import com.example.gestionprojeet.Respository.UtlisateurRepo;
 import com.example.gestionprojeet.classes.Utlisateur;
@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class Utlisateurservice implements UtlisateurInterface {
     @Autowired
-  UtlisateurRepo userRepository;
+    public UtlisateurRepo userRepository;
     @Override
     public void saveUser(Utlisateur user) {
         userRepository.save(user);
@@ -36,12 +36,15 @@ public class Utlisateurservice implements UtlisateurInterface {
 
     @Override
     public Utlisateur updateUser(Utlisateur user) {
-            Utlisateur existingUser = userRepository.findById(user.getId()).get();
+        // ✅ CORRIGÉ : Utilise orElseThrow au lieu de .get()
+        Utlisateur existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + user.getId()));
+
         existingUser.setFirstname(user.getFirstname());
         existingUser.setEmail(user.getEmail());
         existingUser.setPassword(user.getPassword());
 
-            Utlisateur updatedUser = userRepository.save(existingUser);
+        Utlisateur updatedUser = userRepository.save(existingUser);
         return updatedUser;
     }
 

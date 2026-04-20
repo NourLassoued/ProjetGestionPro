@@ -1,0 +1,187 @@
+<!-- ================================
+     SIDEBAR
+================================ -->
+<section id="sidebar" [ngClass]="{'hide': status}">
+  <a href="#" class="brand">
+    <div class="brand-icon"><i class='bx bxs-layer'></i></div>
+    <span>AdminHub</span>
+  </a>
+  <p class="nav-section-label">Navigation</p>
+  <ul class="side-menu top">
+    <li [hidden]="!isAdmin"><a routerLink="/Tableuseer"><i class='bx bxs-dashboard'></i><span>Table</span></a></li>
+    <li><a routerLink="/Projectuser"><i class='bx bxs-shopping-bag'></i><span>Projects</span></a></li>
+    <li><a routerLink="/Carteuser"><i class='bx bxs-card'></i><span>Carte</span></a></li>
+    <li><a href="#"><i class='bx bxs-message-dots'></i><span>Messages</span><span class="menu-badge">3</span></a></li>
+  </ul>
+  <p class="nav-section-label">Account</p>
+  <ul class="side-menu">
+    <li><a (click)="toggleUpdateForm()"><i class='bx bxs-user-circle'></i><span>Profil</span></a></li>
+    <li class="active"><a routerLink="/team"><i class='bx bxs-group'></i><span>Team</span></a></li>
+    <li [hidden]="!isAdmin"><a routerLink="/admin"><i class='bx bxs-shield'></i><span>Admin Space</span></a></li>
+    <li><a href="#"><i class='bx bxs-cog'></i><span>Settings</span></a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <a class="logout-link" (click)="logout()"><i class='bx bxs-log-out-circle'></i><span>Logout</span></a>
+  </div>
+</section>
+
+<!-- ================================
+     CONTENT
+================================ -->
+<section id="content">
+  <nav>
+    <i class='bx bx-menu' (click)="addToggle()" style="cursor:pointer;font-size:22px;color:var(--text-muted);"></i>
+    <span class="page-title">Team Chat</span>
+    <div class="search-wrap"><i class='bx bx-search'></i><input type="search" placeholder="Search..."></div>
+    <div class="nav-icon"><i class='bx bxs-bell'></i>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="avatar">
+      <img *ngIf="profileImage" [src]="profileImage" alt="">
+      <span *ngIf="!profileImage">AD</span>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chat-layout">
+
+      <!-- ====== LEFT: Project list ====== -->
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <h3><i class='bx bxs-folder-open'></i> Projects</h3>
+        </div>
+        <div class="chat-project-list">
+          <div class="chat-project-item" *ngFor="let projet of projetsUtilisateur; let i = index"
+            [class.active]="projetSelectionne?.idProjet === projet.idProjet" (click)="selectProject(projet)">
+            <div class="cp-avatar" [ngClass]="'accent-' + (i % 5)">
+              {{ projet.nom?.charAt(0)?.toUpperCase() || 'P' }}
+            </div>
+            <div class="cp-info">
+              <span class="cp-name">{{ projet.nom }}</span>
+              <span class="cp-members">{{ projet.utilisateurs?.length || 0 }} members</span>
+            </div>
+          </div>
+          <div class="chat-empty" *ngIf="projetsUtilisateur.length === 0">
+            <i class='bx bx-folder-open'></i>
+            <p>No projects</p>
+          </div>
+        </div>
+
+        <!-- Online members -->
+        <div class="chat-sidebar-members" *ngIf="projetSelectionne?.utilisateurs?.length">
+          <div class="chat-sidebar-header">
+            <h3><i class='bx bxs-group'></i> Members</h3>
+          </div>
+          <div class="member-list-chat">
+            <div class="member-item-chat" *ngFor="let user of projetSelectionne!.utilisateurs">
+              <div class="mic-avatar">
+                <img *ngIf="user.image" [src]="getImageUrl(user.image)" alt="">
+                <span *ngIf="!user.image" class="mic-initial"
+                  [ngClass]="'accent-' + ((user.email ? user.email.charCodeAt(0) : 0) % 5)">
+                  {{ user.firstname?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U' }}
+                </span>
+              </div>
+              <div class="mic-info">
+                <span class="mic-name">{{ user.firstname || 'User' }}</span>
+                <span class="mic-email">{{ user.email }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== RIGHT: Chat area ====== -->
+      <div class="chat-main">
+
+        <!-- No project selected -->
+        <div class="chat-placeholder" *ngIf="!projetSelectionne">
+          <i class='bx bxs-message-dots'></i>
+          <h2>Select a project</h2>
+          <p>Choose a project from the left to start chatting with your team</p>
+        </div>
+
+        <!-- Chat header -->
+        <div class="chat-header" *ngIf="projetSelectionne">
+          <div class="ch-left">
+            <div class="ch-avatar" [ngClass]="'accent-' + ((projetSelectionne.nom?.charCodeAt(0) || 0) % 5)">
+              {{ projetSelectionne.nom?.charAt(0)?.toUpperCase() || 'P' }}
+            </div>
+            <div>
+              <h3>{{ projetSelectionne.nom }}</h3>
+              <span class="ch-meta">{{ projetSelectionne.utilisateurs?.length || 0 }} members</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-body" #chatBody *ngIf="projetSelectionne">
+
+          <div class="chat-loading" *ngIf="loading">
+            <i class='bx bx-loader-alt bx-spin'></i>
+          </div>
+
+          <div class="chat-empty-msg" *ngIf="!loading && messages.length === 0">
+            <i class='bx bxs-message-alt'></i>
+            <p>No messages yet. Start the conversation!</p>
+          </div>
+
+          <div *ngFor="let msg of messages" class="msg-row" [class.msg-mine]="isMyMessage(msg)"
+            [class.msg-other]="!isMyMessage(msg)">
+
+            <!-- Avatar (other's messages) -->
+            <div class="msg-avatar" *ngIf="!isMyMessage(msg)">
+              <img *ngIf="msg.expediteur?.image" [src]="getImageUrl(msg.expediteur!.image!)" alt="">
+              <span *ngIf="!msg.expediteur?.image" class="msg-initial"
+                [ngClass]="'accent-' + ((msg.expediteur?.email ? msg.expediteur!.email!.charCodeAt(0) : 0) % 5)">
+                {{ msg.expediteur?.firstname?.charAt(0)?.toUpperCase() ||
+                msg.expediteur?.email?.charAt(0)?.toUpperCase() || 'U' }}
+              </span>
+            </div>
+
+            <div class="msg-content">
+              <div class="msg-sender" *ngIf="!isMyMessage(msg)">
+                {{ msg.expediteur?.firstname || msg.expediteur?.email || 'Unknown' }}
+              </div>
+              <div class="msg-bubble">
+                {{ msg.contenu }}
+              </div>
+              <div class="msg-time">
+                {{ msg.dateEnvoi | date:'HH:mm' }}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area" *ngIf="projetSelectionne">
+          <div class="chat-input-wrap">
+            <input type="text" [(ngModel)]="newMessage" (keypress)="onKeyPress($event)" placeholder="Type a message...">
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+              <i class='bx bxs-send'></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- MODAL: EDIT PROFILE -->
+<div class="modal-overlay" *ngIf="showUpdateForm" (click)="toggleUpdateForm()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <h2>Edit Profile</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group"><label>Email</label><input type="text" [value]="userForm.email" disabled></div>
+      <div class="form-group"><label for="firstname">First Name</label><input type="text" id="firstname"
+          name="firstname" [(ngModel)]="userForm.firstname" required></div>
+      <div class="form-group"><label for="password">Password</label><input type="password" id="password" name="password"
+          [(ngModel)]="userForm.password"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="toggleUpdateForm()"><i class='bx bx-x'></i> Cancel</button>
+        <button type="submit" class="btn-primary"><i class='bx bx-check'></i> Update</button>
+      </div>
+    </form>
+  </div>
+</div>

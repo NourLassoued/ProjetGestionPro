@@ -24,7 +24,7 @@
   <p class="nav-section-label">Account</p>
   <ul class="side-menu">
     <li><a (click)="toggleUpdateForm()"><i class='bx bxs-user-circle'></i><span>Profil</span></a></li>
-    <li><a href="#"><i class='bx bxs-group'></i><span>Team</span></a></li>
+    <li><a  [routerLink]="['/team']"><i class='bx bxs-group'></i><span>Team</span></a></li>
     <li [hidden]="!isAdmin"><a routerLink="/admin"><i class='bx bxs-shield'></i><span>Admin Space</span></a></li>
     <li><a href="#"><i class='bx bxs-cog'></i><span>Settings</span></a></li>
   </ul>

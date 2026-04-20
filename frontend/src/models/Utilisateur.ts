@@ -1,4 +1,5 @@
 import { ForgotPassword } from "./ForgotPassword";
+import { Message } from "./Message";
 import { Projet } from "./Projet";
 import { Role } from "./Role";
 import { Tableau } from "./Tableau";
@@ -16,6 +17,7 @@ export class Utilisateur {
     tableaux!: Tableau[];
     projets!: Projet[];
     forgotPassword!: ForgotPassword;
+    messagesEnvoyes!: Message[];
   
   }
   

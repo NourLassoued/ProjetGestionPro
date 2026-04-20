@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven 3.9.0'
+        jdk 'JDK 17'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📦 Récupération du code depuis GitHub...'
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo '🔨 Compilation du projet backend...'
+                dir('backend') {
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo '✅ Exécution des tests backend...'
+                dir('backend') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Code Quality') {
+            steps {
+                echo '📊 Analyse de qualité du code...'
+                dir('backend') {
+                    sh 'mvn sonar:sonar || true'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '📝 Publication des résultats...'
+            junit 'backend/target/surefire-reports/*.xml'
+        }
+
+        success {
+            echo '✅ Pipeline réussie!'
+        }
+
+        failure {
+            echo '❌ Pipeline échouée!'
+        }
+    }
+}
