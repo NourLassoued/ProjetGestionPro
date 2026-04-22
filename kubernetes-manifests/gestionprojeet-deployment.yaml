@@ -1,0 +1,47 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestionprojeet
+  namespace: default
+  labels:
+    app: gestionprojeet
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gestionprojeet
+  template:
+    metadata:
+      labels:
+        app: gestionprojeet
+    spec:
+      containers:
+      - name: gestionprojeet
+        image: nourlassoued/gestionprojeet:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8089
+          name: http
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql:3306/projet202409?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "password"
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: "update"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8089
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      restartPolicy: Always

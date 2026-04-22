@@ -1,42 +1,180 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+    }
+
     tools {
-        maven 'Maven 3.9.0'
+        maven 'Maven'
         jdk 'JDK 17'
     }
 
+    environment {
+        MAVEN_OPTS = '-Xmx1024m -Xms512m'
+        BUILD_PATH = 'backend'
+        MYSQL_CONTAINER = 'mysql-jenkins-test'
+        MYSQL_PORT = '3307'
+        MYSQL_DB = 'projet202409'
+        MYSQL_ROOT_PASSWORD = 'password'
+    }
+
     stages {
-        stage('Checkout') {
+        stage('🔍 Pre-Checks') {
             steps {
-                echo '📦 Récupération du code depuis GitHub...'
-                checkout scm
+                script {
+                    echo '═══════════════════════════════════════'
+                    echo '   ProjetGestionPro - CI/CD Pipeline'
+                    echo '═══════════════════════════════════════'
+                    echo "📅 Date: ${new Date()}"
+                    echo "🌳 Branch: ${env.GIT_BRANCH}"
+                    echo "🔗 Commit: ${env.GIT_COMMIT.take(7)}"
+                }
             }
         }
 
-        stage('Build') {
+        stage('📦 Checkout') {
+            steps {
+                echo '📥 Récupération du code depuis GitHub...'
+                checkout scm
+                echo '✅ Code récupéré avec succès'
+            }
+        }
+
+        stage('🐳 Start MySQL') {
+            steps {
+                echo '🐳 Démarrage de MySQL en Docker...'
+                script {
+                    sh '''
+                        # Arrêter le conteneur s'il existe
+                        docker stop ${MYSQL_CONTAINER} 2>/dev/null || true
+                        docker rm ${MYSQL_CONTAINER} 2>/dev/null || true
+
+                        # Démarrer MySQL
+                        docker run -d \
+                            --name ${MYSQL_CONTAINER} \
+                            -e MYSQL_DATABASE=${MYSQL_DB} \
+                            -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
+                            -p ${MYSQL_PORT}:3306 \
+                            -v mysql_jenkins_data:/var/lib/mysql \
+                            mysql:8.0
+
+                        echo "⏳ Attendre que MySQL soit prêt..."
+
+                        # Attendre que MySQL soit accessible
+                        for i in {1..30}; do
+                            if docker exec ${MYSQL_CONTAINER} mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD} &> /dev/null; then
+                                echo "✅ MySQL est prêt!"
+                                break
+                            fi
+                            echo "⏳ Tentative $i/30..."
+                            sleep 2
+                        done
+                    '''
+                }
+            }
+            post {
+                failure {
+                    echo '❌ Erreur au démarrage de MySQL'
+                    sh 'docker logs ${MYSQL_CONTAINER} || true'
+                }
+            }
+        }
+
+        stage('🔨 Build') {
             steps {
                 echo '🔨 Compilation du projet backend...'
-                dir('backend') {
-                    sh 'mvn clean package -DskipTests'
+                sh '''
+                    cd ${BUILD_PATH}
+                    mvn clean package -DskipTests \
+                        -Dmaven.test.skip=true \
+                        -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+                '''
+            }
+            post {
+                success {
+                    echo '✅ Build compilé avec succès!'
+                    archiveArtifacts artifacts: '${BUILD_PATH}/target/*.jar',
+                                       allowEmptyArchive: false
+                }
+                failure {
+                    echo '❌ Erreur lors de la compilation'
                 }
             }
         }
 
-        stage('Test') {
+        stage('✅ Tests') {
             steps {
-                echo '✅ Exécution des tests backend...'
-                dir('backend') {
-                    sh 'mvn test'
+                echo '✅ Exécution des tests backend avec MySQL...'
+                script {
+                    sh '''
+                        cd ${BUILD_PATH}
+
+                        # Configurer la connexion MySQL pour les tests
+                        export SPRING_DATASOURCE_URL="jdbc:mysql://localhost:${MYSQL_PORT}/${MYSQL_DB}?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC"
+                        export SPRING_DATASOURCE_USERNAME=root
+                        export SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+                        mvn test \
+                            -Dspring.datasource.url="${SPRING_DATASOURCE_URL}" \
+                            -Dspring.datasource.username=root \
+                            -Dspring.datasource.password=${MYSQL_ROOT_PASSWORD} \
+                            -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
+                    '''
+                }
+            }
+            post {
+                always {
+                    echo '📊 Publication des résultats des tests...'
+                    junit '${BUILD_PATH}/target/surefire-reports/*.xml',
+                          allowEmptyResults: true
+                }
+                success {
+                    echo '✅ Tests réussis!'
+                }
+                failure {
+                    echo '❌ Tests échoués'
                 }
             }
         }
 
-        stage('Code Quality') {
+        stage('📊 Code Quality (Optional)') {
+            when {
+                expression {
+                    fileExists('sonar-project.properties') ||
+                    fileExists('${BUILD_PATH}/sonar-project.properties')
+                }
+            }
             steps {
-                echo '📊 Analyse de qualité du code...'
-                dir('backend') {
-                    sh 'mvn sonar:sonar || true'
+                echo '📊 Analyse SonarQube...'
+                script {
+                    sh '''
+                        cd ${BUILD_PATH}
+                        mvn sonar:sonar || true
+                    '''
+                }
+            }
+            post {
+                failure {
+                    echo '⚠️ SonarQube non disponible (ignoré)'
+                }
+            }
+        }
+
+        stage('📦 Artifacts') {
+            steps {
+                echo '📦 Préparation des artifacts...'
+                script {
+                    sh '''
+                        cd ${BUILD_PATH}
+                        if [ -f target/gestionprojeet-*.jar ]; then
+                            echo "✅ JAR créé avec succès"
+                            ls -lh target/gestionprojeet-*.jar
+                        fi
+                    '''
                 }
             }
         }
@@ -44,16 +182,34 @@ pipeline {
 
     post {
         always {
-            echo '📝 Publication des résultats...'
-            junit 'backend/target/surefire-reports/*.xml'
+            echo '═══════════════════════════════════════'
+            echo '       Pipeline Terminalé'
+            echo '═══════════════════════════════════════'
+
+            script {
+                echo '🧹 Arrêt et nettoyage de MySQL...'
+                sh '''
+                    docker stop ${MYSQL_CONTAINER} 2>/dev/null || true
+                    docker rm ${MYSQL_CONTAINER} 2>/dev/null || true
+                    echo "✅ MySQL arrêté"
+                '''
+            }
         }
 
         success {
-            echo '✅ Pipeline réussie!'
+            echo '✅ PIPELINE RÉUSSIE! 🎉'
+            echo '📝 Logs disponibles dans Blue Ocean'
+            echo '📊 Résultats des tests archivés'
         }
 
         failure {
-            echo '❌ Pipeline échouée!'
+            echo '❌ PIPELINE ÉCHOUÉE!'
+            echo '📝 Vérifier les logs ci-dessus'
+        }
+
+        unstable {
+            echo '⚠️ PIPELINE INSTABLE'
+            echo '📊 Certains tests/vérifications ont échoué'
         }
     }
 }
