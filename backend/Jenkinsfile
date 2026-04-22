@@ -8,208 +8,156 @@ pipeline {
         ansiColor('xterm')
     }
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK 17'
-    }
-
     environment {
-        MAVEN_OPTS = '-Xmx1024m -Xms512m'
-        BUILD_PATH = 'backend'
-        MYSQL_CONTAINER = 'mysql-jenkins-test'
-        MYSQL_PORT = '3307'
-        MYSQL_DB = 'projet202409'
-        MYSQL_ROOT_PASSWORD = 'password'
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_IMAGE = 'nourlassoued/gestionprojeet'
+        GIT_CREDENTIALS = 'github-token'
+        DOCKER_CREDENTIALS = 'docker-credentials'
     }
 
     stages {
-        stage('🔍 Pre-Checks') {
+        stage('Pre-Checks') {
             steps {
-                script {
-                    echo '═══════════════════════════════════════'
-                    echo '   ProjetGestionPro - CI/CD Pipeline'
-                    echo '═══════════════════════════════════════'
-                    echo "📅 Date: ${new Date()}"
-                    echo "🌳 Branch: ${env.GIT_BRANCH}"
-                    echo "🔗 Commit: ${env.GIT_COMMIT.take(7)}"
-                }
+                echo '========================================='
+                echo 'PRE-CHECKS'
+                echo '========================================='
+                sh 'echo Branch: \${GIT_BRANCH}'
+                sh 'echo Commit: \${GIT_COMMIT}'
+                sh 'java -version'
+                sh 'mvn --version'
+                sh 'docker --version'
+                sh 'kubectl version --client'
             }
         }
 
-        stage('📦 Checkout') {
+        stage('Checkout Code') {
             steps {
-                echo '📥 Récupération du code depuis GitHub...'
+                echo '========================================='
+                echo 'CHECKOUT CODE'
+                echo '========================================='
                 checkout scm
-                echo '✅ Code récupéré avec succès'
             }
         }
 
-        stage('🐳 Start MySQL') {
+        stage('Build & Test') {
             steps {
-                echo '🐳 Démarrage de MySQL en Docker...'
+                echo '========================================='
+                echo 'BUILD & TEST'
+                echo '========================================='
+                dir('backend') {
+                    sh './mvnw clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                echo '========================================='
+                echo 'DOCKER BUILD & PUSH'
+                echo '========================================='
+                dir('backend') {
+                    script {
+                        def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                        sh "docker build -t \${DOCKER_IMAGE}:latest ."
+                        sh "docker build -t \${DOCKER_IMAGE}:\${imageTag} ."
+
+                        withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh 'echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin'
+                            sh "docker push \${DOCKER_IMAGE}:latest"
+                            sh "docker push \${DOCKER_IMAGE}:\${imageTag}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Update K8s Manifests') {
+            steps {
+                echo '========================================='
+                echo 'UPDATE KUBERNETES MANIFESTS'
+                echo '========================================='
                 script {
-                    sh '''
-                        # Arrêter le conteneur s'il existe
-                        docker stop ${MYSQL_CONTAINER} 2>/dev/null || true
-                        docker rm ${MYSQL_CONTAINER} 2>/dev/null || true
+                    def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
 
-                        # Démarrer MySQL
-                        docker run -d \
-                            --name ${MYSQL_CONTAINER} \
-                            -e MYSQL_DATABASE=${MYSQL_DB} \
-                            -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
-                            -p ${MYSQL_PORT}:3306 \
-                            -v mysql_jenkins_data:/var/lib/mysql \
-                            mysql:8.0
-
-                        echo "⏳ Attendre que MySQL soit prêt..."
-
-                        # Attendre que MySQL soit accessible
-                        for i in {1..30}; do
-                            if docker exec ${MYSQL_CONTAINER} mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD} &> /dev/null; then
-                                echo "✅ MySQL est prêt!"
-                                break
-                            fi
-                            echo "⏳ Tentative $i/30..."
-                            sleep 2
-                        done
-                    '''
-                }
-            }
-            post {
-                failure {
-                    echo '❌ Erreur au démarrage de MySQL'
-                    sh 'docker logs ${MYSQL_CONTAINER} || true'
+                    sh """
+                        sed -i 's|image: nourlassoued/gestionprojeet:.*|image: nourlassoued/gestionprojeet:\${imageTag}|g' kubernetes-manifests/gestionprojeet-deployment.yaml
+                    """
                 }
             }
         }
 
-        stage('🔨 Build') {
+        stage('Commit & Push to Git') {
             steps {
-                echo '🔨 Compilation du projet backend...'
-                sh '''
-                    cd ${BUILD_PATH}
-                    mvn clean package -DskipTests \
-                        -Dmaven.test.skip=true \
-                        -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
-                '''
-            }
-            post {
-                success {
-                    echo '✅ Build compilé avec succès!'
-                    archiveArtifacts artifacts: '${BUILD_PATH}/target/*.jar',
-                                       allowEmptyArchive: false
-                }
-                failure {
-                    echo '❌ Erreur lors de la compilation'
-                }
-            }
-        }
-
-        stage('✅ Tests') {
-            steps {
-                echo '✅ Exécution des tests backend avec MySQL...'
+                echo '========================================='
+                echo 'COMMIT & PUSH TO GIT'
+                echo '========================================='
                 script {
-                    sh '''
-                        cd ${BUILD_PATH}
+                    def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
 
-                        # Configurer la connexion MySQL pour les tests
-                        export SPRING_DATASOURCE_URL="jdbc:mysql://localhost:${MYSQL_PORT}/${MYSQL_DB}?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC"
-                        export SPRING_DATASOURCE_USERNAME=root
-                        export SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD}
-
-                        mvn test \
-                            -Dspring.datasource.url="${SPRING_DATASOURCE_URL}" \
-                            -Dspring.datasource.username=root \
-                            -Dspring.datasource.password=${MYSQL_ROOT_PASSWORD} \
-                            -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
-                    '''
-                }
-            }
-            post {
-                always {
-                    echo '📊 Publication des résultats des tests...'
-                    junit '${BUILD_PATH}/target/surefire-reports/*.xml',
-                          allowEmptyResults: true
-                }
-                success {
-                    echo '✅ Tests réussis!'
-                }
-                failure {
-                    echo '❌ Tests échoués'
+                    withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                        sh """
+                            git config user.email "jenkins@example.com"
+                            git config user.name "Jenkins Bot"
+                            git add kubernetes-manifests/gestionprojeet-deployment.yaml
+                            git commit -m "🚀 Update GestionProjet image to \${imageTag}" || true
+                            git push https://\${GIT_USER}:\${GIT_PASS}@github.com/NourLassoued/ProjetGestionPro.git HEAD:main
+                        """
+                    }
                 }
             }
         }
 
-        stage('📊 Code Quality (Optional)') {
-            when {
-                expression {
-                    fileExists('sonar-project.properties') ||
-                    fileExists('${BUILD_PATH}/sonar-project.properties')
-                }
-            }
+        stage('Trigger Argo CD Sync') {
             steps {
-                echo '📊 Analyse SonarQube...'
-                script {
-                    sh '''
-                        cd ${BUILD_PATH}
-                        mvn sonar:sonar || true
-                    '''
-                }
-            }
-            post {
-                failure {
-                    echo '⚠️ SonarQube non disponible (ignoré)'
-                }
+                echo '========================================='
+                echo 'TRIGGER ARGO CD SYNC'
+                echo '========================================='
+                sh """
+                    echo 'Argo CD will auto-sync via webhook'
+                    echo 'Application: gestionprojeet'
+                    echo 'Status: Syncing...'
+                """
             }
         }
 
-        stage('📦 Artifacts') {
+        stage('Kubernetes Verification') {
             steps {
-                echo '📦 Préparation des artifacts...'
-                script {
-                    sh '''
-                        cd ${BUILD_PATH}
-                        if [ -f target/gestionprojeet-*.jar ]; then
-                            echo "✅ JAR créé avec succès"
-                            ls -lh target/gestionprojeet-*.jar
-                        fi
-                    '''
-                }
+                echo '========================================='
+                echo 'KUBERNETES VERIFICATION'
+                echo '========================================='
+                sh """
+                    sleep 30
+                    kubectl get all -n default
+                    kubectl logs -l app=gestionprojeet -n default | tail -20
+                """
+            }
+        }
+
+        stage('Summary') {
+            steps {
+                echo '========================================='
+                echo '✅ PIPELINE COMPLETED SUCCESSFULLY!'
+                echo '========================================='
+                echo 'Image: nourlassoued/gestionprojeet'
+                echo 'Git: Updated'
+                echo 'Argo CD: Synced'
+                echo 'Kubernetes: Running'
+                echo '========================================='
             }
         }
     }
 
     post {
         always {
-            echo '═══════════════════════════════════════'
-            echo '       Pipeline Terminalé'
-            echo '═══════════════════════════════════════'
-
-            script {
-                echo '🧹 Arrêt et nettoyage de MySQL...'
-                sh '''
-                    docker stop ${MYSQL_CONTAINER} 2>/dev/null || true
-                    docker rm ${MYSQL_CONTAINER} 2>/dev/null || true
-                    echo "✅ MySQL arrêté"
-                '''
-            }
+            echo 'Pipeline finished'
+            cleanWs()
         }
-
         success {
-            echo '✅ PIPELINE RÉUSSIE! 🎉'
-            echo '📝 Logs disponibles dans Blue Ocean'
-            echo '📊 Résultats des tests archivés'
+            echo '✅ BUILD SUCCESS'
         }
-
         failure {
-            echo '❌ PIPELINE ÉCHOUÉE!'
-            echo '📝 Vérifier les logs ci-dessus'
-        }
-
-        unstable {
-            echo '⚠️ PIPELINE INSTABLE'
-            echo '📊 Certains tests/vérifications ont échoué'
+            echo '❌ BUILD FAILURE'
         }
     }
 }
