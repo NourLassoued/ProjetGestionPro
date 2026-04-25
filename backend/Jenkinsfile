@@ -52,8 +52,8 @@ pipeline {
                     // Publier résultats tests
                     junit '**/target/surefire-reports/*.xml'
 
-                    // ✅ Publier coverage avec le plugin Coverage
-                    publishCoverage adapters: [jacocoAdapter('**/target/site/jacoco/jacoco.xml')]
+                    // ✅ SYNTAXE CORRECTE - recordCoverage au lieu de publishCoverage
+                    recordCoverage(tools: [[parser: 'JACOCO', pattern: '**/target/site/jacoco/jacoco.xml']])
                 }
             }
         }
@@ -159,6 +159,7 @@ pipeline {
                 echo '========================================='
                 script {
                     def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
                     sh """
                         sed -i 's|image: nourlassoued/gestionprojeet:.*|image: nourlassoued/gestionprojeet:${imageTag}|g' kubernetes-manifests/gestionprojeet-deployment.yaml
                     """
@@ -173,6 +174,7 @@ pipeline {
                 echo '========================================='
                 script {
                     def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
                     withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                         sh """
                             git config user.email "jenkins@example.com"
