@@ -5,7 +5,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 30, unit: 'MINUTES')
         timestamps()
-        ansiColor('xterm')
     }
 
     environment {
@@ -21,12 +20,10 @@ pipeline {
                 echo '========================================='
                 echo 'PRE-CHECKS'
                 echo '========================================='
-                sh 'echo Branch: \${GIT_BRANCH}'
-                sh 'echo Commit: \${GIT_COMMIT}'
+                sh 'echo Branch: ${GIT_BRANCH}'
+                sh 'echo Commit: ${GIT_COMMIT}'
                 sh 'java -version'
-                sh 'mvn --version'
                 sh 'docker --version'
-                sh 'kubectl version --client'
             }
         }
 
@@ -42,11 +39,75 @@ pipeline {
         stage('Build & Test') {
             steps {
                 echo '========================================='
-                echo 'BUILD & TEST'
+                echo 'BUILD & TEST WITH COVERAGE'
                 echo '========================================='
                 dir('backend') {
-                    sh './mvnw clean package -DskipTests'
+                    sh 'chmod +x ./mvnw'
+                    sh './mvnw clean test jacoco:report'
+                    sh './mvnw package -DskipTests'
                 }
+            }
+            post {
+                always {
+                    // Publier résultats tests
+                    junit '**/target/surefire-reports/*.xml'
+
+                    // ✅ Publier coverage avec le plugin Coverage
+                    publishCoverage adapters: [jacocoAdapter('**/target/site/jacoco/jacoco.xml')]
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo '========================================='
+                echo 'SONARQUBE ANALYSIS WITH COVERAGE'
+                echo '========================================='
+                dir('backend') {
+                    script {
+                        def scannerHome = tool 'SonarQube Scanner'
+                        withSonarQubeEnv('SonarQube') {
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=gestionprojeet \
+                                -Dsonar.sources=src/main/java \
+                                -Dsonar.java.binaries=target/classes \
+                                -Dsonar.language=java \
+                                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                echo '========================================='
+                echo 'QUALITY GATE CHECK'
+                echo '========================================='
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Quality Gate failed: ${qg.status}"
+                        }
+                        echo "✅ Quality Gate PASSED"
+                    }
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                echo '========================================='
+                echo 'ARCHIVE BUILD ARTIFACTS'
+                echo '========================================='
+                archiveArtifacts(
+                    artifacts: 'backend/target/*.jar',
+                    fingerprint: true,
+                    onlyIfSuccessful: true
+                )
             }
         }
 
@@ -59,15 +120,34 @@ pipeline {
                     script {
                         def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
 
-                        sh "docker build -t \${DOCKER_IMAGE}:latest ."
-                        sh "docker build -t \${DOCKER_IMAGE}:\${imageTag} ."
+                        sh "docker build -t ${DOCKER_IMAGE}:latest ."
+                        sh "docker build -t ${DOCKER_IMAGE}:${imageTag} ."
 
                         withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            sh 'echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin'
-                            sh "docker push \${DOCKER_IMAGE}:latest"
-                            sh "docker push \${DOCKER_IMAGE}:\${imageTag}"
+                            sh 'echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin'
+                            sh "docker push ${DOCKER_IMAGE}:latest"
+                            sh "docker push ${DOCKER_IMAGE}:${imageTag}"
                         }
                     }
+                }
+            }
+        }
+
+        stage('Docker Security Scan') {
+            steps {
+                echo '========================================='
+                echo 'DOCKER SECURITY SCAN WITH TRIVY'
+                echo '========================================='
+                script {
+                    def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    sh """
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:latest image \
+                            --severity HIGH,CRITICAL \
+                            ${DOCKER_IMAGE}:${imageTag}
+                    """
                 }
             }
         }
@@ -79,9 +159,8 @@ pipeline {
                 echo '========================================='
                 script {
                     def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-
                     sh """
-                        sed -i 's|image: nourlassoued/gestionprojeet:.*|image: nourlassoued/gestionprojeet:\${imageTag}|g' kubernetes-manifests/gestionprojeet-deployment.yaml
+                        sed -i 's|image: nourlassoued/gestionprojeet:.*|image: nourlassoued/gestionprojeet:${imageTag}|g' kubernetes-manifests/gestionprojeet-deployment.yaml
                     """
                 }
             }
@@ -94,14 +173,13 @@ pipeline {
                 echo '========================================='
                 script {
                     def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-
                     withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                         sh """
                             git config user.email "jenkins@example.com"
                             git config user.name "Jenkins Bot"
                             git add kubernetes-manifests/gestionprojeet-deployment.yaml
-                            git commit -m "🚀 Update GestionProjet image to \${imageTag}" || true
-                            git push https://\${GIT_USER}:\${GIT_PASS}@github.com/NourLassoued/ProjetGestionPro.git HEAD:main
+                            git commit -m "🚀 Update GestionProjet image to ${imageTag}" || true
+                            git push https://${GIT_USER}:${GIT_PASS}@github.com/NourLassoued/ProjetGestionPro.git HEAD:main
                         """
                     }
                 }
@@ -121,28 +199,21 @@ pipeline {
             }
         }
 
-        stage('Kubernetes Verification') {
-            steps {
-                echo '========================================='
-                echo 'KUBERNETES VERIFICATION'
-                echo '========================================='
-                sh """
-                    sleep 30
-                    kubectl get all -n default
-                    kubectl logs -l app=gestionprojeet -n default | tail -20
-                """
-            }
-        }
-
         stage('Summary') {
             steps {
                 echo '========================================='
                 echo '✅ PIPELINE COMPLETED SUCCESSFULLY!'
                 echo '========================================='
-                echo 'Image: nourlassoued/gestionprojeet'
-                echo 'Git: Updated'
-                echo 'Argo CD: Synced'
-                echo 'Kubernetes: Running'
+                script {
+                    def imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Image: nourlassoued/gestionprojeet:${imageTag}"
+                    echo 'Git: Updated ✅'
+                    echo 'SonarQube: Quality Gate PASSED ✅'
+                    echo 'Tests: Executed ✅'
+                    echo 'Coverage: Published ✅'
+                    echo 'Security: Scanned ✅'
+                    echo 'Argo CD: Syncing...'
+                }
                 echo '========================================='
             }
         }
